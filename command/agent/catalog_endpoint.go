@@ -139,5 +139,9 @@ func (s *HTTPServer) CatalogNodeServices(resp http.ResponseWriter, req *http.Req
 	if err := s.agent.RPC("Catalog.NodeServices", &args, &out); err != nil {
 		return nil, err
 	}
+	if out.NodeServices == nil {
+		resp.WriteHeader(404)
+		return nil, nil
+	}
 	return out.NodeServices, nil
 }
