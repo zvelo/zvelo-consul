@@ -287,6 +287,26 @@ func TestCatalogServiceNodes(t *testing.T) {
 	if len(nodes) != 1 {
 		t.Fatalf("bad: %v", obj)
 	}
+
+	// Returns 404 if service doesn't exist
+	req, err = http.NewRequest("GET", "/v1/catalog/service/baz", nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	resp = httptest.NewRecorder()
+	obj, err = srv.CatalogServiceNodes(resp, req)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if obj != nil {
+		t.Fatalf("bad: %#v", obj)
+	}
+
+	if resp.Code != 404 {
+		t.Fatalf("bad: %#v", resp.Code)
+	}
 }
 
 func TestCatalogNodeServices(t *testing.T) {
@@ -343,11 +363,10 @@ func TestCatalogNodeServices(t *testing.T) {
 	}
 
 	if obj != nil {
-		t.Fatalf("bad: %#v", services)
+		t.Fatalf("bad: %#v", obj)
 	}
 
 	if resp.Code != 404 {
 		t.Fatalf("bad: %#v", resp.Code)
 	}
-
 }
