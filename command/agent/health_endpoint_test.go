@@ -64,6 +64,26 @@ func TestHealthNodeChecks(t *testing.T) {
 	if len(nodes) != 1 {
 		t.Fatalf("bad: %v", obj)
 	}
+
+	// Should return 404 for non-existent node
+	req, err = http.NewRequest("GET", "/v1/health/node/baz", nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	resp = httptest.NewRecorder()
+	obj, err = srv.HealthNodeChecks(resp, req)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if obj != nil {
+		t.Fatalf("bad: %#v", obj)
+	}
+
+	if resp.Code != 404 {
+		t.Fatalf("bad: %v", resp.Code)
+	}
 }
 
 func TestHealthServiceChecks(t *testing.T) {

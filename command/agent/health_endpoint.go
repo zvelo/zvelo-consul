@@ -51,6 +51,12 @@ func (s *HTTPServer) HealthNodeChecks(resp http.ResponseWriter, req *http.Reques
 	if err := s.agent.RPC("Health.NodeChecks", &args, &out); err != nil {
 		return nil, err
 	}
+
+	if out.HealthChecks == nil || len(out.HealthChecks) == 0 {
+		resp.WriteHeader(404)
+		return nil, nil
+	}
+
 	return out.HealthChecks, nil
 }
 
