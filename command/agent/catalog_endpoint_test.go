@@ -305,7 +305,7 @@ func TestCatalogServiceNodes(t *testing.T) {
 	}
 
 	if resp.Code != 404 {
-		t.Fatalf("bad: %#v", resp.Code)
+		t.Fatalf("bad: %v", resp.Code)
 	}
 }
 
@@ -367,6 +367,6 @@ func TestCatalogNodeServices(t *testing.T) {
 	}
 
 	if resp.Code != 404 {
-		t.Fatalf("bad: %#v", resp.Code)
+		t.Fatalf("bad: %v", resp.Code)
 	}
 }
