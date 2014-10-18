@@ -115,6 +115,12 @@ func (s *HTTPServer) CatalogServiceNodes(resp http.ResponseWriter, req *http.Req
 	if err := s.agent.RPC("Catalog.ServiceNodes", &args, &out); err != nil {
 		return nil, err
 	}
+
+	if out.ServiceNodes == nil || len(out.ServiceNodes) == 0 {
+		resp.WriteHeader(404)
+		return nil, nil
+	}
+
 	return out.ServiceNodes, nil
 }
 
@@ -139,9 +145,11 @@ func (s *HTTPServer) CatalogNodeServices(resp http.ResponseWriter, req *http.Req
 	if err := s.agent.RPC("Catalog.NodeServices", &args, &out); err != nil {
 		return nil, err
 	}
-	if out.NodeServices == nil {
+
+	if out.NodeServices == nil || len(out.NodeServices.Services) == 0 {
 		resp.WriteHeader(404)
 		return nil, nil
 	}
+
 	return out.NodeServices, nil
 }
