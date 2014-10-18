@@ -181,6 +181,12 @@ func (s *HTTPServer) ACLGet(resp http.ResponseWriter, req *http.Request) (interf
 	if err := s.agent.RPC("ACL.Get", &args, &out); err != nil {
 		return nil, err
 	}
+
+	if out.ACLs == nil || len(out.ACLs) == 0 {
+		resp.WriteHeader(404)
+		return nil, nil
+	}
+
 	return out.ACLs, nil
 }
 
