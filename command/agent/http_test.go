@@ -242,6 +242,31 @@ func TestParseConsistency_Invalid(t *testing.T) {
 	}
 }
 
+func TestBadRequest(t *testing.T) {
+	httpTest(t, func(srv *HTTPServer) {
+		hostStr := fmt.Sprintf("%s:%d", srv.agent.config.BindAddr, srv.agent.config.Ports.HTTP)
+		resp, err := http.Get(fmt.Sprintf("http://%s/bad/endpoint", hostStr))
+		if err != nil {
+			t.Fatalf("err: %v", err)
+		}
+
+		// Returns 400 response on bad endpoints
+		if resp.StatusCode != 400 {
+			t.Fatalf("bad: %v", resp.StatusCode)
+		}
+
+		// Returns a JSON object containing the error
+		expected := fmt.Sprintf(`{"result":"%s"}`, HTTPErrorBadRequest)
+		actual, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if string(actual) != expected {
+			t.Fatalf("bad: %v", string(actual))
+		}
+	})
+}
+
 // assertIndex tests that X-Consul-Index is set and non-zero
 func assertIndex(t *testing.T, resp *httptest.ResponseRecorder) {
 	header := resp.Header().Get("X-Consul-Index")

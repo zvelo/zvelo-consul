@@ -15,6 +15,27 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// Static error messages and other response-related constants
+const (
+	HTTPErrorNodeNotFound       = "Node not found"
+	HTTPErrorServiceNotFound    = "Service not found"
+	HTTPErrorACLNotFound        = "ACL not found"
+	HTTPErrorKeyNotFound        = "Key not found"
+	HTTPErrorMissingACL         = "Missing ACL"
+	HTTPErrorMissingServiceName = "Missing service name"
+	HTTPErrorMissingNodeName    = "Missing node name"
+	HTTPErrorMissingCheckState  = "Missing check state"
+	HTTPErrorMissingKeyName     = "Missing key name"
+	HTTPErrorMissingSession     = "Missing session"
+	HTTPErrorACLDisabled        = "ACL support disabled"
+	HTTPErrorACLSetID           = "ACL ID cannot be set"
+	HTTPErrorACLIDNotSet        = "ACL ID must be set"
+	HTTPErrorBadRequest         = "Bad request"
+	HTTPErrorMethodNotAllowed   = "Method not allowed"
+	HTTPResultSuccess           = "Success"
+	HTTPResultFailed            = "Failed"
+)
+
 // HTTPServer is used to wrap an Agent and expose various API's
 // in a RESTful manner
 type HTTPServer struct {
@@ -189,7 +210,9 @@ func (s *HTTPServer) wrap(handler func(resp http.ResponseWriter, req *http.Reque
 func (s *HTTPServer) Index(resp http.ResponseWriter, req *http.Request) {
 	// Check if this is a non-index path
 	if req.URL.Path != "/" {
-		resp.WriteHeader(404)
+		resp.WriteHeader(400)
+		buf, _ := json.Marshal(HTTPResult{HTTPErrorBadRequest})
+		resp.Write(buf)
 		return
 	}
 
@@ -317,4 +340,10 @@ func (s *HTTPServer) parse(resp http.ResponseWriter, req *http.Request, dc *stri
 		return true
 	}
 	return parseWait(resp, req, b)
+}
+
+// HTTPResult wraps a simple status or error message to give the API a
+// consistent output format.
+type HTTPResult struct {
+	Result string `json:"result"`
 }

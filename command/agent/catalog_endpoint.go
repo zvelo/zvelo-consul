@@ -11,8 +11,7 @@ func (s *HTTPServer) CatalogRegister(resp http.ResponseWriter, req *http.Request
 	var args structs.RegisterRequest
 	if err := decodeBody(req, &args, nil); err != nil {
 		resp.WriteHeader(400)
-		resp.Write([]byte(fmt.Sprintf("Request decode failed: %v", err)))
-		return nil, nil
+		return HTTPResult{fmt.Sprintf("Request decode failed: %v", err)}, nil
 	}
 
 	// Setup the default DC if not provided
@@ -25,14 +24,13 @@ func (s *HTTPServer) CatalogRegister(resp http.ResponseWriter, req *http.Request
 	if err := s.agent.RPC("Catalog.Register", &args, &out); err != nil {
 		return nil, err
 	}
-	return true, nil
+	return HTTPResult{HTTPResultSuccess}, nil
 }
 
 func (s *HTTPServer) CatalogDeregister(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	var args structs.DeregisterRequest
 	if err := decodeBody(req, &args, nil); err != nil {
 		resp.WriteHeader(400)
-		resp.Write([]byte(fmt.Sprintf("Request decode failed: %v", err)))
 		return nil, nil
 	}
 
@@ -46,7 +44,7 @@ func (s *HTTPServer) CatalogDeregister(resp http.ResponseWriter, req *http.Reque
 	if err := s.agent.RPC("Catalog.Deregister", &args, &out); err != nil {
 		return nil, err
 	}
-	return true, nil
+	return HTTPResult{HTTPResultSuccess}, nil
 }
 
 func (s *HTTPServer) CatalogDatacenters(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
@@ -105,8 +103,7 @@ func (s *HTTPServer) CatalogServiceNodes(resp http.ResponseWriter, req *http.Req
 	args.ServiceName = strings.TrimPrefix(req.URL.Path, "/v1/catalog/service/")
 	if args.ServiceName == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing service name"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingServiceName}, nil
 	}
 
 	// Make the RPC request
@@ -118,7 +115,7 @@ func (s *HTTPServer) CatalogServiceNodes(resp http.ResponseWriter, req *http.Req
 
 	if out.ServiceNodes == nil || len(out.ServiceNodes) == 0 {
 		resp.WriteHeader(404)
-		return nil, nil
+		return HTTPResult{HTTPErrorServiceNotFound}, nil
 	}
 
 	return out.ServiceNodes, nil
@@ -135,8 +132,7 @@ func (s *HTTPServer) CatalogNodeServices(resp http.ResponseWriter, req *http.Req
 	args.Node = strings.TrimPrefix(req.URL.Path, "/v1/catalog/node/")
 	if args.Node == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing node name"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingNodeName}, nil
 	}
 
 	// Make the RPC request
@@ -148,7 +144,7 @@ func (s *HTTPServer) CatalogNodeServices(resp http.ResponseWriter, req *http.Req
 
 	if out.NodeServices == nil || len(out.NodeServices.Services) == 0 {
 		resp.WriteHeader(404)
-		return nil, nil
+		return HTTPResult{HTTPErrorNodeNotFound}, nil
 	}
 
 	return out.NodeServices, nil

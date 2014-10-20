@@ -60,8 +60,8 @@ func (s *HTTPServer) KVSGet(resp http.ResponseWriter, req *http.Request, args *s
 	params := req.URL.Query()
 	if _, ok := params["recurse"]; ok {
 		method = "KVS.List"
-	} else if missingKey(resp, args) {
-		return nil, nil
+	} else if e := missingKey(resp, args); e != nil {
+		return e, nil
 	}
 
 	// Make the RPC
@@ -74,7 +74,10 @@ func (s *HTTPServer) KVSGet(resp http.ResponseWriter, req *http.Request, args *s
 	// Check if we get a not found
 	if len(out.Entries) == 0 {
 		resp.WriteHeader(404)
-		return nil, nil
+		if len(params["recurse"]) > 0 {
+			return []string{}, nil
+		}
+		return HTTPResult{HTTPErrorKeyNotFound}, nil
 	}
 
 	// Check if we are in raw mode with a normal get, write out
@@ -133,8 +136,8 @@ func (s *HTTPServer) KVSGetKeys(resp http.ResponseWriter, req *http.Request, arg
 
 // KVSPut handles a PUT request
 func (s *HTTPServer) KVSPut(resp http.ResponseWriter, req *http.Request, args *structs.KeyRequest) (interface{}, error) {
-	if missingKey(resp, args) {
-		return nil, nil
+	if e := missingKey(resp, args); e != nil {
+		return e, nil
 	}
 	applyReq := structs.KVSRequest{
 		Datacenter: args.Datacenter,
@@ -182,8 +185,7 @@ func (s *HTTPServer) KVSPut(resp http.ResponseWriter, req *http.Request, args *s
 	// Check the content-length
 	if req.ContentLength > maxKVSize {
 		resp.WriteHeader(413)
-		resp.Write([]byte(fmt.Sprintf("Value exceeds %d byte limit", maxKVSize)))
-		return nil, nil
+		return HTTPResult{fmt.Sprintf("Value exceeds %d byte limit", maxKVSize)}, nil
 	}
 
 	// Copy the value
@@ -201,9 +203,13 @@ func (s *HTTPServer) KVSPut(resp http.ResponseWriter, req *http.Request, args *s
 
 	// Only use the out value if this was a CAS
 	if applyReq.Op == structs.KVSSet {
-		return true, nil
+		return HTTPResult{HTTPResultSuccess}, nil
 	} else {
-		return out, nil
+		if out {
+			return HTTPResult{HTTPResultSuccess}, nil
+		} else {
+			return HTTPResult{HTTPResultFailed}, nil
+		}
 	}
 }
 
@@ -222,8 +228,8 @@ func (s *HTTPServer) KVSDelete(resp http.ResponseWriter, req *http.Request, args
 	params := req.URL.Query()
 	if _, ok := params["recurse"]; ok {
 		applyReq.Op = structs.KVSDeleteTree
-	} else if missingKey(resp, args) {
-		return nil, nil
+	} else if e := missingKey(resp, args); e != nil {
+		return e, nil
 	}
 
 	// Make the RPC
@@ -235,11 +241,11 @@ func (s *HTTPServer) KVSDelete(resp http.ResponseWriter, req *http.Request, args
 }
 
 // missingKey checks if the key is missing
-func missingKey(resp http.ResponseWriter, args *structs.KeyRequest) bool {
+func missingKey(resp http.ResponseWriter, args *structs.KeyRequest) *HTTPResult {
 	if args.Key == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing key name"))
-		return true
+		e := HTTPResult{HTTPErrorMissingKeyName}
+		return &e
 	}
-	return false
+	return nil
 }

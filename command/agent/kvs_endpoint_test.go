@@ -41,7 +41,7 @@ func TestKVSEndpoint_PUT_GET_DELETE(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 	}
@@ -116,7 +116,7 @@ func TestKVSEndpoint_Recurse(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 	}
@@ -177,8 +177,13 @@ func TestKVSEndpoint_Recurse(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if obj != nil {
-			t.Fatalf("bad: %v", obj)
+		// Empty recurse result is returned as an empty list
+		if _, ok := obj.([]string); !ok {
+			t.Fatalf("bad: %#v", obj)
+		}
+
+		if r := obj.([]string); len(r) != 0 {
+			t.Fatalf("bad: %#v", obj)
 		}
 	}
 }
@@ -204,7 +209,7 @@ func TestKVSEndpoint_CAS(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 	}
@@ -241,7 +246,7 @@ func TestKVSEndpoint_CAS(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if res := obj.(bool); res {
+		if res := obj.(HTTPResult); res.Result == HTTPResultSuccess {
 			t.Fatalf("should NOT work")
 		}
 	}
@@ -261,7 +266,7 @@ func TestKVSEndpoint_CAS(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 	}
@@ -309,7 +314,7 @@ func TestKVSEndpoint_ListKeys(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 	}
@@ -355,7 +360,7 @@ func TestKVSEndpoint_AcquireRelease(t *testing.T) {
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 
@@ -387,7 +392,7 @@ func TestKVSEndpoint_AcquireRelease(t *testing.T) {
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 
@@ -422,7 +427,7 @@ func TestKVSEndpoint_GET_Raw(t *testing.T) {
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		if res := obj.(bool); !res {
+		if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 

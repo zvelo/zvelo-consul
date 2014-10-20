@@ -110,6 +110,25 @@ func TestACLClone(t *testing.T) {
 		if len(respObj) != 1 {
 			t.Fatalf("bad: %v", respObj)
 		}
+
+		// Returns 404 if the ACL doesn't exist
+		req, err = http.NewRequest("GET", "/v1/acl/info/baz", nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		obj, err = srv.ACLGet(resp, req)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if obj != nil {
+			t.Fatalf("bad: %#v", obj)
+		}
+
+		if resp.Code != 404 {
+			t.Fatalf("bad: %v", resp.Code)
+		}
 	})
 }
 

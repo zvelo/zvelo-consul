@@ -15,8 +15,7 @@ type aclCreateResponse struct {
 // aclDisabled handles if ACL datacenter is not configured
 func aclDisabled(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	resp.WriteHeader(401)
-	resp.Write([]byte("ACL support disabled"))
-	return nil, nil
+	return HTTPResult{HTTPErrorACLDisabled}, nil
 }
 
 func (s *HTTPServer) ACLDestroy(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
@@ -36,8 +35,7 @@ func (s *HTTPServer) ACLDestroy(resp http.ResponseWriter, req *http.Request) (in
 	args.ACL.ID = strings.TrimPrefix(req.URL.Path, "/v1/acl/destroy/")
 	if args.ACL.ID == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing ACL"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingACL}, nil
 	}
 
 	var out string
@@ -75,23 +73,20 @@ func (s *HTTPServer) aclSet(resp http.ResponseWriter, req *http.Request, update 
 	if req.ContentLength > 0 {
 		if err := decodeBody(req, &args.ACL, nil); err != nil {
 			resp.WriteHeader(400)
-			resp.Write([]byte(fmt.Sprintf("Request decode failed: %v", err)))
-			return nil, nil
+			return HTTPResult{fmt.Sprintf("Request decode failed: %v", err)}, nil
 		}
 	}
 
 	// Ensure there is no ID set for create
 	if !update && args.ACL.ID != "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte(fmt.Sprintf("ACL ID cannot be set")))
-		return nil, nil
+		return HTTPResult{HTTPErrorACLSetID}, nil
 	}
 
 	// Ensure there is an ID set for update
 	if update && args.ACL.ID == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte(fmt.Sprintf("ACL ID must be set")))
-		return nil, nil
+		return HTTPResult{HTTPErrorACLIDNotSet}, nil
 	}
 
 	// Create the acl, get the ID
@@ -123,8 +118,7 @@ func (s *HTTPServer) ACLClone(resp http.ResponseWriter, req *http.Request) (inte
 	args.ACL = strings.TrimPrefix(req.URL.Path, "/v1/acl/clone/")
 	if args.ACL == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing ACL"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingACL}, nil
 	}
 
 	var out structs.IndexedACLs
@@ -136,8 +130,7 @@ func (s *HTTPServer) ACLClone(resp http.ResponseWriter, req *http.Request) (inte
 	// Bail if the ACL is not found
 	if len(out.ACLs) == 0 {
 		resp.WriteHeader(404)
-		resp.Write([]byte(fmt.Sprintf("Target ACL not found")))
-		return nil, nil
+		return HTTPResult{HTTPErrorACLNotFound}, nil
 	}
 
 	// Create a new ACL
@@ -172,8 +165,7 @@ func (s *HTTPServer) ACLGet(resp http.ResponseWriter, req *http.Request) (interf
 	args.ACL = strings.TrimPrefix(req.URL.Path, "/v1/acl/info/")
 	if args.ACL == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing ACL"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingACL}, nil
 	}
 
 	var out structs.IndexedACLs
@@ -204,5 +196,11 @@ func (s *HTTPServer) ACLList(resp http.ResponseWriter, req *http.Request) (inter
 	if err := s.agent.RPC("ACL.List", &args, &out); err != nil {
 		return nil, err
 	}
+
+	if out.ACLs == nil || len(out.ACLs) == 0 {
+		resp.WriteHeader(404)
+		return HTTPResult{HTTPErrorACLNotFound}, nil
+	}
+
 	return out.ACLs, nil
 }

@@ -115,7 +115,10 @@ func TestSessionDestroy(t *testing.T) {
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		if resp := obj.(bool); !resp {
+		if _, ok := obj.(HTTPResult); !ok {
+			t.Fatalf("bad: %#v", obj)
+		}
+		if resp := obj.(HTTPResult); resp.Result != HTTPResultSuccess {
 			t.Fatalf("should work")
 		}
 	})

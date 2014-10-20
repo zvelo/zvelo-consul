@@ -35,8 +35,8 @@ func TestCatalogRegister(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 
-	res := obj.(bool)
-	if res != true {
+	res := obj.(HTTPResult)
+	if res.Result != HTTPResultSuccess {
 		t.Fatalf("bad: %v", res)
 	}
 
@@ -75,8 +75,7 @@ func TestCatalogDeregister(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 
-	res := obj.(bool)
-	if res != true {
+	if res := obj.(HTTPResult); res.Result != HTTPResultSuccess {
 		t.Fatalf("bad: %v", res)
 	}
 }
@@ -244,6 +243,22 @@ func TestCatalogServices(t *testing.T) {
 	if len(services) != 2 {
 		t.Fatalf("bad: %v", obj)
 	}
+
+	// Returns 404 if service doesn't exist
+	req, err = http.NewRequest("GET", "/v1/catalog/service/baz", nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	resp = httptest.NewRecorder()
+	obj, err = srv.CatalogServiceNodes(resp, req)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if resp.Code != 404 {
+		t.Fatalf("bad: %v", resp.Code)
+	}
 }
 
 func TestCatalogServiceNodes(t *testing.T) {
@@ -300,8 +315,28 @@ func TestCatalogServiceNodes(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if obj != nil {
+	if _, ok := obj.(HTTPResult); !ok {
 		t.Fatalf("bad: %#v", obj)
+	}
+
+	if obj.(HTTPResult).Result != HTTPErrorServiceNotFound {
+		t.Fatalf("bad: %#v", obj)
+	}
+
+	if resp.Code != 404 {
+		t.Fatalf("bad: %v", resp.Code)
+	}
+
+	// Returns 404 if node doesn't exist
+	req, err = http.NewRequest("GET", "/v1/catalog/node/baz", nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	resp = httptest.NewRecorder()
+	obj, err = srv.CatalogNodeServices(resp, req)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 
 	if resp.Code != 404 {
@@ -362,7 +397,10 @@ func TestCatalogNodeServices(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if obj != nil {
+	if _, ok := obj.(HTTPResult); !ok {
+		t.Fatalf("bad: %#v", obj)
+	}
+	if obj.(HTTPResult).Result != HTTPErrorNodeNotFound {
 		t.Fatalf("bad: %#v", obj)
 	}
 

@@ -29,7 +29,7 @@ func (s *HTTPServer) SessionCreate(resp http.ResponseWriter, req *http.Request) 
 	// Mandate a PUT request
 	if req.Method != "PUT" {
 		resp.WriteHeader(405)
-		return nil, nil
+		return HTTPResult{HTTPErrorMethodNotAllowed}, nil
 	}
 
 	// Default the session to our node + serf check
@@ -47,8 +47,7 @@ func (s *HTTPServer) SessionCreate(resp http.ResponseWriter, req *http.Request) 
 	if req.ContentLength > 0 {
 		if err := decodeBody(req, &args.Session, FixupLockDelay); err != nil {
 			resp.WriteHeader(400)
-			resp.Write([]byte(fmt.Sprintf("Request decode failed: %v", err)))
-			return nil, nil
+			return HTTPResult{fmt.Sprintf("Request decode failed: %v", err)}, nil
 		}
 	}
 
@@ -106,7 +105,7 @@ func (s *HTTPServer) SessionDestroy(resp http.ResponseWriter, req *http.Request)
 	// Mandate a PUT request
 	if req.Method != "PUT" {
 		resp.WriteHeader(405)
-		return nil, nil
+		return HTTPResult{HTTPErrorMethodNotAllowed}, nil
 	}
 
 	args := structs.SessionRequest{
@@ -118,15 +117,14 @@ func (s *HTTPServer) SessionDestroy(resp http.ResponseWriter, req *http.Request)
 	args.Session.ID = strings.TrimPrefix(req.URL.Path, "/v1/session/destroy/")
 	if args.Session.ID == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing session"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingSession}, nil
 	}
 
 	var out string
 	if err := s.agent.RPC("Session.Apply", &args, &out); err != nil {
 		return nil, err
 	}
-	return true, nil
+	return HTTPResult{HTTPResultSuccess}, nil
 }
 
 // SessionGet is used to get info for a particular session
@@ -140,8 +138,7 @@ func (s *HTTPServer) SessionGet(resp http.ResponseWriter, req *http.Request) (in
 	args.Session = strings.TrimPrefix(req.URL.Path, "/v1/session/info/")
 	if args.Session == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing session"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingSession}, nil
 	}
 
 	var out structs.IndexedSessions
@@ -178,8 +175,7 @@ func (s *HTTPServer) SessionsForNode(resp http.ResponseWriter, req *http.Request
 	args.Node = strings.TrimPrefix(req.URL.Path, "/v1/session/node/")
 	if args.Node == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing node name"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingNodeName}, nil
 	}
 
 	var out structs.IndexedSessions
