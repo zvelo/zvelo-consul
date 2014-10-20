@@ -250,13 +250,13 @@ func TestBadRequest(t *testing.T) {
 			t.Fatalf("err: %v", err)
 		}
 
-		// Returns 400 response on bad endpoints
-		if resp.StatusCode != 400 {
+		// Returns 501 response on bad endpoints
+		if resp.StatusCode != 501 {
 			t.Fatalf("bad: %v", resp.StatusCode)
 		}
 
 		// Returns a JSON object containing the error
-		expected := fmt.Sprintf(`{"result":"%s"}`, HTTPErrorBadRequest)
+		expected := fmt.Sprintf(`{"result":"%s"}`, HTTPErrorNotImplemented)
 		actual, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			t.Fatalf("err: %s", err)

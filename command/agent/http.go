@@ -32,8 +32,8 @@ const (
 	HTTPErrorACLIDNotSet        = "ACL ID must be set"
 	HTTPErrorBadRequest         = "Bad request"
 	HTTPErrorMethodNotAllowed   = "Method not allowed"
+	HTTPErrorNotImplemented     = "Not implemented"
 	HTTPResultSuccess           = "Success"
-	HTTPResultFailed            = "Failed"
 )
 
 // HTTPServer is used to wrap an Agent and expose various API's
@@ -210,8 +210,8 @@ func (s *HTTPServer) wrap(handler func(resp http.ResponseWriter, req *http.Reque
 func (s *HTTPServer) Index(resp http.ResponseWriter, req *http.Request) {
 	// Check if this is a non-index path
 	if req.URL.Path != "/" {
-		resp.WriteHeader(400)
-		buf, _ := json.Marshal(HTTPResult{HTTPErrorBadRequest})
+		resp.WriteHeader(501)
+		buf, _ := json.Marshal(HTTPResult{HTTPErrorNotImplemented})
 		resp.Write(buf)
 		return
 	}
