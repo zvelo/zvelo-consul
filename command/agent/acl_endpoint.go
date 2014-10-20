@@ -21,6 +21,7 @@ func aclDisabled(resp http.ResponseWriter, req *http.Request) (interface{}, erro
 func (s *HTTPServer) ACLDestroy(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	// Mandate a PUT request
 	if req.Method != "PUT" {
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return nil, nil
 	}
@@ -56,6 +57,7 @@ func (s *HTTPServer) ACLUpdate(resp http.ResponseWriter, req *http.Request) (int
 func (s *HTTPServer) aclSet(resp http.ResponseWriter, req *http.Request, update bool) (interface{}, error) {
 	// Mandate a PUT request
 	if req.Method != "PUT" {
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return nil, nil
 	}
@@ -102,6 +104,7 @@ func (s *HTTPServer) aclSet(resp http.ResponseWriter, req *http.Request, update 
 func (s *HTTPServer) ACLClone(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	// Mandate a PUT request
 	if req.Method != "PUT" {
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return nil, nil
 	}

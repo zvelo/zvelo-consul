@@ -20,6 +20,7 @@ const (
 func (s *HTTPServer) EventFire(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	// Mandate a PUT request
 	if req.Method != "PUT" {
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return nil, nil
 	}
@@ -32,8 +33,7 @@ func (s *HTTPServer) EventFire(resp http.ResponseWriter, req *http.Request) (int
 	event.Name = strings.TrimPrefix(req.URL.Path, "/v1/event/fire/")
 	if event.Name == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing name"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingEventName}, nil
 	}
 
 	// Get the filters

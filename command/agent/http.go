@@ -27,12 +27,14 @@ const (
 	HTTPErrorMissingCheckState  = "Missing check state"
 	HTTPErrorMissingKeyName     = "Missing key name"
 	HTTPErrorMissingSession     = "Missing session"
+	HTTPErrorMissingEventName   = "Missing event name"
 	HTTPErrorACLDisabled        = "ACL support disabled"
 	HTTPErrorACLSetID           = "ACL ID cannot be set"
 	HTTPErrorACLIDNotSet        = "ACL ID must be set"
 	HTTPErrorBadRequest         = "Bad request"
-	HTTPErrorMethodNotAllowed   = "Method not allowed"
 	HTTPErrorNotImplemented     = "Not implemented"
+	HTTPErrorMethodNotAllowed   = "Method not allowed"
+	HTTPResultNotModified       = "Not modified"
 	HTTPResultSuccess           = "Success"
 )
 

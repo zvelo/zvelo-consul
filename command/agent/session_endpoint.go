@@ -28,6 +28,7 @@ type sessionCreateResponse struct {
 func (s *HTTPServer) SessionCreate(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	// Mandate a PUT request
 	if req.Method != "PUT" {
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return HTTPResult{HTTPErrorMethodNotAllowed}, nil
 	}
@@ -104,6 +105,7 @@ func FixupLockDelay(raw interface{}) error {
 func (s *HTTPServer) SessionDestroy(resp http.ResponseWriter, req *http.Request) (interface{}, error) {
 	// Mandate a PUT request
 	if req.Method != "PUT" {
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return HTTPResult{HTTPErrorMethodNotAllowed}, nil
 	}

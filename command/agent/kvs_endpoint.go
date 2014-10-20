@@ -47,6 +47,7 @@ func (s *HTTPServer) KVSEndpoint(resp http.ResponseWriter, req *http.Request) (i
 	case "DELETE":
 		return s.KVSDelete(resp, req, &args)
 	default:
+		resp.Header().Set("Allow", "PUT")
 		resp.WriteHeader(405)
 		return nil, nil
 	}
@@ -196,8 +197,8 @@ func (s *HTTPServer) KVSPut(resp http.ResponseWriter, req *http.Request, args *s
 	applyReq.DirEnt.Value = buf.Bytes()
 
 	// Make the RPC
-	var out bool
-	if err := s.agent.RPC("KVS.Apply", &applyReq, &out); err != nil {
+	var res bool
+	if err := s.agent.RPC("KVS.Apply", &applyReq, &res); err != nil {
 		return nil, err
 	}
 
@@ -205,10 +206,10 @@ func (s *HTTPServer) KVSPut(resp http.ResponseWriter, req *http.Request, args *s
 	if applyReq.Op == structs.KVSSet {
 		return HTTPResult{HTTPResultSuccess}, nil
 	} else {
-		if out {
+		if res {
 			return HTTPResult{HTTPResultSuccess}, nil
 		} else {
-			return HTTPResult{HTTPResultFailed}, nil
+			return HTTPResult{HTTPResultNotModified}, nil
 		}
 	}
 }
