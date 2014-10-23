@@ -74,15 +74,13 @@ func (s *HTTPServer) AgentRegisterCheck(resp http.ResponseWriter, req *http.Requ
 	}
 	if err := decodeBody(req, &args, decodeCB); err != nil {
 		resp.WriteHeader(400)
-		resp.Write([]byte(fmt.Sprintf("Request decode failed: %v", err)))
-		return nil, nil
+		return HTTPResult{fmt.Sprintf("Request decode failed: %v", err)}, nil
 	}
 
 	// Verify the check has a name
 	if args.Name == "" {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Missing check name"))
-		return nil, nil
+		return HTTPResult{HTTPErrorMissingCheckName}, nil
 	}
 
 	// Construct the health check
@@ -92,8 +90,7 @@ func (s *HTTPServer) AgentRegisterCheck(resp http.ResponseWriter, req *http.Requ
 	chkType := &args.CheckType
 	if !chkType.Valid() {
 		resp.WriteHeader(400)
-		resp.Write([]byte("Must provide TTL or Script and Interval!"))
-		return nil, nil
+		return HTTPResult{HTTPErrorInvalidCheck}, nil
 	}
 
 	// Add the check
