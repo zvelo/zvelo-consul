@@ -1,4 +1,11 @@
-# Consul Agent in Docker
+zvelo-consul
+============
+
+[![wercker status](https://app.wercker.com/status/5398156ba91194805dc001e3af45a59f/s “wercker status”)](https://app.wercker.com/project/bykey/5398156ba91194805dc001e3af45a59f)
+
+Forked from [progrium/docker-consul](https://github.com/progrium/docker-consul)
+
+## Consul Agent in Docker
 
 This project is a Docker container for [Consul](http://www.consul.io/). It's a slightly opinionated, pre-configured Consul Agent made specifically to work in the Docker ecosystem.
 
