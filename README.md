@@ -1,4 +1,7 @@
-# Consul [![Build Status](https://travis-ci.org/hashicorp/consul.png)](https://travis-ci.org/hashicorp/consul)
+zvelo-consul
+============
+
+[![wercker status](https://app.wercker.com/status/5398156ba91194805dc001e3af45a59f/s "wercker status")](https://app.wercker.com/project/bykey/5398156ba91194805dc001e3af45a59f)
 
 * Website: http://www.consul.io
 * IRC: `#consul` on Freenode
