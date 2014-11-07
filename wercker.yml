@@ -12,7 +12,6 @@ build:
         - script:
             name: docker save
             code: |
-                make image
                 mkdir ${WERCKER_OUTPUT_DIR}/zvelo
                 docker save zvelo/zvelo-consul > ${WERCKER_OUTPUT_DIR}/zvelo/zvelo-consul.tar
 
