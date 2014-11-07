@@ -6,7 +6,7 @@ build:
         # Build the docker image
         - script:
             name: make build
-            code: make build
+            code: make build && make tag
 
         # Save docker image
         - script:
