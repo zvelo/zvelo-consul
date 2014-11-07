@@ -1,13 +1,16 @@
 FROM 		progrium/busybox
-MAINTAINER 	Jeff Lindsay <progrium@gmail.com>
+MAINTAINER 	Joshua Rubin <jrubin@zvelo.com>
 
-ADD https://dl.bintray.com/mitchellh/consul/0.4.1_linux_amd64.zip /tmp/consul.zip
+ENV CONSUL_VERSION 0.4.1
+ENV DOCKER_VERSION 1.3.1
+
+ADD https://dl.bintray.com/mitchellh/consul/${CONSUL_VERSION}_linux_amd64.zip /tmp/consul.zip
 RUN cd /bin && unzip /tmp/consul.zip && chmod +x /bin/consul && rm /tmp/consul.zip
 
-ADD https://dl.bintray.com/mitchellh/consul/0.4.1_web_ui.zip /tmp/webui.zip
+ADD https://dl.bintray.com/mitchellh/consul/${CONSUL_VERSION}_web_ui.zip /tmp/webui.zip
 RUN cd /tmp && unzip /tmp/webui.zip && mv dist /ui && rm /tmp/webui.zip
 
-ADD https://get.docker.io/builds/Linux/x86_64/docker-1.2.0 /bin/docker
+ADD https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION} /bin/docker
 RUN chmod +x /bin/docker
 
 RUN opkg-install curl bash
