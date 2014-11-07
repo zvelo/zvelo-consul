@@ -1,1 +1,36 @@
-box: wercker/default
+box: wercker-labs/docker
+
+# Build definition
+build:
+    steps:
+        # Build the docker image
+        - script:
+            name: make build
+            code: make build
+
+        # Save docker image
+        - script:
+            name: docker save
+            code: |
+                make image
+                mkdir ${WERCKER_OUTPUT_DIR}/zvelo
+                docker save zvelo/zvelo-consul > ${WERCKER_OUTPUT_DIR}/zvelo/zvelo-consul.tar
+
+    after-steps:
+        - hipchat-notify:
+            token: $HIPCHAT_TOKEN
+            room-id: $HIPCHAT_ROOM_ID
+
+deploy:
+  steps:
+      # Push the image to the hub
+      - zvelo/docker-hub-push:
+            image: zvelo/zvelo-consul
+            username: $DOCKER_USERNAME
+            password: $DOCKER_PASSWORD
+            email: $DOCKER_EMAIL
+
+  after-steps:
+    - hipchat-notify:
+        token: $HIPCHAT_TOKEN
+        room-id: $HIPCHAT_ROOM_ID
